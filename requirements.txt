@@ -1,0 +1,7 @@
+yt-dlp
+openai-whisper
+youtube-transcript-api
+google-generativeai
+python-dotenv
+torch
+setuptools-rust

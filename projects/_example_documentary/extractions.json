@@ -1,0 +1,41 @@
+{
+  "01_key_quotes": [
+    {
+      "source": "01_interviews/example_interview.wav",
+      "clips": [
+        {
+          "start": 45.0,
+          "end": 60.0,
+          "name": "expert_key_quote",
+          "note": "Core thesis statement from expert interview"
+        }
+      ]
+    }
+  ],
+  "02_narration_segments": [
+    {
+      "source": "02_narration_voiceover/example_narration.wav",
+      "clips": [
+        {
+          "start": 0.0,
+          "end": 30.0,
+          "name": "opening_narration",
+          "note": "Opening narration for documentary intro"
+        }
+      ]
+    }
+  ],
+  "03_ambient_beds": [
+    {
+      "source": "03_ambient_field/example_cityscape.wav",
+      "clips": [
+        {
+          "start": 10.0,
+          "end": 70.0,
+          "name": "city_ambient_bed",
+          "note": "60s urban ambient bed for transition sequences"
+        }
+      ]
+    }
+  ]
+}

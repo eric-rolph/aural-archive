@@ -1,0 +1,59 @@
+{
+  "01_livestock_rattle": [
+    {
+      "source": "01_livestock_auctioneers/example_auctioneer.wav",
+      "clips": [
+        {
+          "start": 0.0,
+          "end": 18.0,
+          "name": "championship_rattle_full",
+          "note": "Full championship chant — the cleanest rattle sample"
+        },
+        {
+          "start": 9.0,
+          "end": 15.0,
+          "name": "rattle_tight_loop",
+          "note": "Tight 6s loop suitable for beat-syncing"
+        }
+      ]
+    }
+  ],
+  "02_art_precision": [
+    {
+      "source": "02_art_auctions/example_art_sale.wav",
+      "clips": [
+        {
+          "start": 7.0,
+          "end": 30.0,
+          "name": "bidding_war_escalation",
+          "note": "Classic art auction escalation — 'Do you want a bid sir?'"
+        },
+        {
+          "start": 77.0,
+          "end": 91.0,
+          "name": "hammer_sold",
+          "note": "'The hammer is upset, selling on this side, fair warning, SOLD'"
+        }
+      ]
+    }
+  ],
+  "03_oneshots": [
+    {
+      "source": "03_realestate_storage/example_auction.wav",
+      "clips": [
+        {
+          "start": 31.5,
+          "end": 35.0,
+          "name": "oneshot_going_going",
+          "note": "ONE-SHOT: 'Going going going' — transition trigger"
+        },
+        {
+          "start": 34.5,
+          "end": 37.0,
+          "name": "oneshot_sold_congratulations",
+          "note": "ONE-SHOT: 'SOLD, congratulations' — drop trigger"
+        }
+      ]
+    }
+  ]
+}

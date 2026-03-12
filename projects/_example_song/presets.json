@@ -1,0 +1,48 @@
+{
+  "categories": {
+    "01_livestock_auctioneers": {
+      "label": "Livestock Auctioneers (The Flute Solo)",
+      "description": "Fast rhythmic 'rattle' filler between numbers. Use for 0:00-0:45 intro.",
+      "search_terms": [
+        "World Livestock Auctioneer Championship",
+        "WLAC auctioneer championship",
+        "LMA Auctions livestock auctioneer",
+        "DVAuction championship auctioneer"
+      ],
+      "keywords": ["championship", "rattle", "chant", "cadence"]
+    },
+    "02_art_auctions": {
+      "label": "High-End Art Auctions (The Clarinet/Bassoon)",
+      "description": "British, precise contrast. Melodic but measured for 122-128 BPM Deep House transition.",
+      "search_terms": [
+        "Sotheby's Evening Sale Live",
+        "Christie's Hong Kong Live auction",
+        "Oliver Barker Sotheby's auction",
+        "Jussi Pylkkänen Christie's auction"
+      ],
+      "keywords": ["hammer price", "on the phone", "fair warning"]
+    },
+    "03_realestate_storage": {
+      "label": "Real Estate & Storage Auctions (The Brass)",
+      "description": "Grittier, aggressive. Suited for 138-150 BPM Acid/Hard Techno sections.",
+      "search_terms": [
+        "Ray White Auction Highlights",
+        "Storage Unit Auction Chant",
+        "real estate auction chant aggressive",
+        "Australian property auction highlights"
+      ],
+      "keywords": ["sold", "going once", "last chance"]
+    },
+    "04_data_broker_pitch": {
+      "label": "Data Broker Pitch (The Break)",
+      "description": "Corporate Memphis soullessness. For 'Your attention has been valued at $0.003' moment.",
+      "search_terms": [
+        "AdTech Conference Keynote speaker",
+        "Data Brokerage Marketing Video",
+        "programmatic advertising pitch conference",
+        "digital advertising data marketplace"
+      ],
+      "keywords": ["data", "audience", "targeting", "monetize", "impression"]
+    }
+  }
+}

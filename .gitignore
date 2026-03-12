@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+
+# Virtual environment
+venv/
+.venv/
+
+# Environment variables
+.env
+
+# Audio/Video files (keep these local, not in git)
+*.wav
+*.mp3
+*.mp4
+*.webm
+*.opus
+*.m4a
+*.flac
+
+# Project output directories (user-generated content)
+projects/*/output/
+projects/*/samples/
+
+# Temp files
+temp_audio*
+temp_video*
+
+# OS
+Thumbs.db
+.DS_Store
+
+# IDE
+.vscode/
+.idea/

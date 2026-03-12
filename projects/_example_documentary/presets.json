@@ -1,0 +1,40 @@
+{
+  "categories": {
+    "01_interviews": {
+      "label": "Expert Interviews",
+      "description": "Subject matter expert interviews, talking heads, panel discussions.",
+      "search_terms": [
+        "expert interview on climate change",
+        "TED talk environment keynote"
+      ],
+      "keywords": ["interview", "expert", "discussion"]
+    },
+    "02_narration_voiceover": {
+      "label": "Narration & Voiceover",
+      "description": "Documentary-style narration, voice-over samples, storytelling.",
+      "search_terms": [
+        "documentary narration example",
+        "nature documentary voice over"
+      ],
+      "keywords": ["narration", "voiceover", "storytelling"]
+    },
+    "03_ambient_field": {
+      "label": "Field Recordings & Ambience",
+      "description": "On-location audio, environmental sounds, room tone.",
+      "search_terms": [
+        "field recording city sounds",
+        "nature ambience recording"
+      ],
+      "keywords": ["field recording", "ambient", "environment"]
+    },
+    "04_archival_audio": {
+      "label": "Archival & Historical Audio",
+      "description": "Historical speeches, news broadcasts, archival footage audio.",
+      "search_terms": [
+        "historical speech audio",
+        "vintage news broadcast"
+      ],
+      "keywords": ["archival", "historical", "vintage"]
+    }
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "categories": {
+    "01_archival_footage": {
+      "label": "Archival Footage",
+      "description": "Historical broadcasts, narration, and documentary analysis.",
+      "search_terms": [
+        "historical archive footage",
+        "broadcast news history"
+      ],
+      "keywords": ["archive", "broadcast", "history"]
+    },
+    "02_expert_testimony": {
+      "label": "Expert Testimony",
+      "description": "Oral histories, academic interviews, and expert commentary.",
+      "search_terms": [
+        "expert testimony audio",
+        "academic interview recording"
+      ],
+      "keywords": ["interview", "testimony", "expert"]
+    },
+    "03_field_recordings": {
+      "label": "Field Recordings",
+      "description": "Environmental audio and site recordings.",
+      "search_terms": [
+        "field recording ambient",
+        "urban environment capture"
+      ],
+      "keywords": ["ambient", "field", "environment"]
+    }
+  }
+}

@@ -1,5 +1,5 @@
 """
-Media Harvest — Sample Extraction Module
+Aural Archive — Sample Extraction Module
 ==========================================
 Extracts timestamped clips from downloaded audio files based on
 an extraction map (extractions.json). Outputs organized clips
@@ -66,7 +66,7 @@ def run_extraction(project: str, sample_rate: int = 44100, bit_depth: int = 16):
     samples_dir = config.get_project_samples_dir(project)
 
     print("=" * 70)
-    print(f"  MEDIA HARVEST — SAMPLE EXTRACTION")
+    print(f"  Aural Archive — SAMPLE EXTRACTION")
     print(f"  Project: {project}")
     print("=" * 70)
 

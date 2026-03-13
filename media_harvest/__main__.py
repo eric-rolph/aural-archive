@@ -1,7 +1,7 @@
 """
-Media Harvest — Unified CLI
-=============================
-Entry point for all media-harvest operations.
+Aural Archive — Unified CLI
+============================
+Entry point for all aural-archive operations.
 
 Usage:
     python -m media_harvest init <project>
@@ -31,32 +31,23 @@ from .extract import run_extraction
 
 EXAMPLE_PRESETS = {
     "categories": {
-        "01_vocals": {
-            "label": "Vocals & Speech",
-            "description": "Spoken word, speeches, vocals for sampling.",
-            "search_terms": [
-                "famous speech audio",
-                "spoken word poetry"
-            ],
-            "keywords": ["speech", "vocal", "spoken"]
-        },
-        "02_ambient": {
-            "label": "Ambient & Atmosphere",
-            "description": "Environmental sounds, textures, room tones.",
+        "01_field_recordings": {
+            "label": "Field Recordings",
+            "description": "Environmental audio, site recordings, and found sound.",
             "search_terms": [
                 "field recording nature",
-                "urban ambient sound"
+                "urban ambient atmosphere"
             ],
-            "keywords": ["ambient", "texture", "atmosphere"]
+            "keywords": ["ambient", "field", "atmosphere"]
         },
-        "03_instruments": {
-            "label": "Instruments & Music",
-            "description": "Musical performances, instrument recordings.",
+        "02_archival_sources": {
+            "label": "Archival Sources",
+            "description": "Historical broadcasts, oral histories, and public domain archives.",
             "search_terms": [
-                "street musician performance",
-                "live concert audio"
+                "archival interview audio",
+                "historical radio broadcast"
             ],
-            "keywords": ["music", "instrument", "live"]
+            "keywords": ["archive", "history", "speech"]
         }
     }
 }
@@ -126,12 +117,12 @@ def cmd_init(args):
     print(f"     {project_dir}")
     print(f"\n  Project structure:")
     print(f"     {project}/")
-    print(f"     ├── presets.json       ← Edit: define your search categories & terms")
-    print(f"     ├── extractions.json   ← Edit: define which clips to cut (after downloading)")
-    print(f"     ├── output/            ← Downloads land here")
+    print(f"     ├── presets.json       ← Edit: define archival capture categories")
+    print(f"     ├── extractions.json   ← Edit: define which clips to cut (after acquisition)")
+    print(f"     ├── output/            ← Archived recordings land here")
     print(f"     └── samples/           ← Extracted clips land here")
     print(f"\n  Next steps:")
-    print(f"     1. Edit presets.json with your YouTube search terms")
+    print(f"     1. Edit presets.json with your archival parameters")
     print(f"     2. python -m media_harvest download --project {project} --search")
     print(f"     3. python -m media_harvest transcribe --project {project}")
     print(f"     4. Edit extractions.json with timestamps from transcripts")
@@ -143,7 +134,7 @@ def cmd_init(args):
 # ─────────────────────────────────────────────────────────────────────────────
 
 def cmd_download(args):
-    """Download audio from YouTube."""
+    """Acquire audio from digital repositories."""
     project = args.project
     presets = load_presets(project)
     ensure_output_dirs(project, presets)
@@ -158,7 +149,7 @@ def cmd_download(args):
         sys.exit(1)
 
     print("=" * 70)
-    print(f"  MEDIA HARVEST — DOWNLOAD")
+    print(f"  AURAL ARCHIVE — ACQUIRE")
     print(f"  Project: {project}")
     print(f"  Output: {args.output_format.upper()} PCM {args.bit_depth}-bit, {args.sample_rate} Hz, Stereo")
     print("=" * 70)
@@ -301,7 +292,7 @@ def cmd_status(args):
 def cmd_list(args):
     """List all projects."""
     projects_dir = config.PROJECTS_DIR
-    print(f"\n  MEDIA HARVEST — Projects")
+    print(f"\n  Aural Archive — Projects")
     print(f"  {'─' * 50}")
 
     if not projects_dir.exists():
@@ -331,17 +322,17 @@ def cmd_list(args):
 
 def main():
     parser = argparse.ArgumentParser(
-        prog="media_harvest",
-        description="Media Harvest — Download, transcribe, and extract audio samples from YouTube",
+        prog="aural_archive",
+        description="Aural Archive — Acquire, transcribe, and analyze audio recordings for research and archival\n\nLEGAL NOTICE: This tool is for personal and research use with content you have the right to access. Respect all copyrights and terms of service.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""\
 Examples:
-  python -m media_harvest init my-song
-  python -m media_harvest download --project my-song --search
-  python -m media_harvest download --project my-song --url "https://youtube.com/watch?v=..."
-  python -m media_harvest transcribe --project my-song
-  python -m media_harvest extract --project my-song
-  python -m media_harvest status --project my-song
+  python -m media_harvest init field-study-01
+  python -m media_harvest download --project field-study-01 --search
+  python -m media_harvest download --project field-study-01 --url "https://..."
+  python -m media_harvest transcribe --project field-study-01
+  python -m media_harvest extract --project field-study-01
+  python -m media_harvest status --project field-study-01
   python -m media_harvest list
         """,
     )
@@ -355,7 +346,7 @@ Examples:
     p_init.set_defaults(func=cmd_init)
 
     # ── download ──
-    p_dl = subparsers.add_parser("download", help="Download audio from YouTube")
+    p_dl = subparsers.add_parser("download", help="Acquire audio from various sources")
     p_dl.add_argument("--project", "-p", required=True, help="Project name")
     mode_group = p_dl.add_mutually_exclusive_group(required=True)
     mode_group.add_argument("--search", action="store_true",
@@ -414,6 +405,12 @@ Examples:
     if not args.command:
         parser.print_help()
         sys.exit(1)
+
+    # Global Disclaimer
+    print(f"\n{'─' * 70}")
+    print("  NOTICE: Aural Archive is for personal and research use with content")
+    print("  you have the legal right to access. Respect all copyrights.")
+    print(f"{'─' * 70}")
 
     args.func(args)
 

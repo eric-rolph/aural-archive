@@ -1,5 +1,5 @@
 """
-Shared utilities for Media Harvest.
+Shared utilities for Aural Archive.
 """
 
 import re

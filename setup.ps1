@@ -1,4 +1,4 @@
-Write-Host "Setting up Media Harvest Environment..." -ForegroundColor Cyan
+Write-Host "Setting up Aural Archive Environment..." -ForegroundColor Cyan
 
 if (!(Test-Path "venv")) {
     Write-Host "Creating virtual environment..."
@@ -21,6 +21,6 @@ Write-Host "  1. .\venv\Scripts\Activate.ps1"
 Write-Host "  2. python -m media_harvest --help"
 Write-Host ""
 Write-Host "Quick start:" -ForegroundColor Cyan
-Write-Host "  python -m media_harvest init my-song-project"
-Write-Host "  python -m media_harvest download --project my-song-project --url 'https://youtube.com/watch?v=...'"
-Write-Host "  python -m media_harvest transcribe --project my-song-project"
+Write-Host "  python -m media_harvest init field-study-01"
+Write-Host "  python -m media_harvest download --project field-study-01 --url 'https://...'"
+Write-Host "  python -m media_harvest transcribe --project field-study-01"

@@ -1,0 +1,34 @@
+{
+  "01_intro_samples": [
+    {
+      "source": "01_vocals/example_file.wav",
+      "clips": [
+        {
+          "start": 0.0,
+          "end": 10.0,
+          "name": "intro_vocal_hook",
+          "note": "Opening vocal line for song intro"
+        },
+        {
+          "start": 15.0,
+          "end": 22.0,
+          "name": "verse_vocal",
+          "note": "Key phrase for verse section"
+        }
+      ]
+    }
+  ],
+  "02_texture_layers": [
+    {
+      "source": "02_ambient/example_ambient.wav",
+      "clips": [
+        {
+          "start": 0.0,
+          "end": 30.0,
+          "name": "ambient_bed",
+          "note": "30s ambient texture for background layer"
+        }
+      ]
+    }
+  ]
+}

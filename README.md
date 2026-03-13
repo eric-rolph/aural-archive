@@ -1,111 +1,102 @@
-# 🎵 Media Harvest
+# 🎙️ Aural Archive
 
-**A general-purpose media extraction & transcription toolkit.**
+**A general-purpose audio transcription and sonic archival toolkit.**
 
-Download audio from YouTube (or any yt-dlp-supported site), transcribe it with Whisper or captions API, and extract timestamped samples — all organized into named projects for any creative need: songs, documentaries, podcasts, sample packs, whatever.
+Aural Archive is a suite of tools designed to facilitate the collection, transcription, and time-coding of "found sound" and field recordings. Whether analyzing historical archives, documenting environmental soundscapes, or conducting qualitative media research, this toolkit provides a structured pipeline for organizing audio data and extracting meaningful segments with precision.
 
-## Features
+## Core Purpose
 
-- **🔍 Smart Search** — Search YouTube with preset queries, browse results interactively, or batch-download
-- **⬇️ Download & Convert** — Extract audio and convert to production-ready WAV (PCM 16/24/32-bit, configurable sample rate)
-- **🎙️ Multi-Strategy Transcription**:
-  - **YouTube Captions API** — fastest, pulls official/auto-generated captions
-  - **OpenAI Whisper** — local speech-to-text with timestamped segments
-  - **Google Gemini** — visual video transcription with scene descriptions
-- **✂️ Sample Extraction** — Cut precise clips by timestamp from downloaded files
-- **📁 Project-Based Organization** — Each creative project gets its own config, downloads, transcripts, and samples
+This tool is intended for researchers, archivists, sound artists, and ethnomusicologists to:
+1. **Catalog** audio from diverse sources into structured research projects.
+2. **Transcribe** spoken word or sonic events with high-fidelity time-codes.
+3. **Analyze** long-form recordings to identify and preserve specific "found sound" moments.
+4. **Export** precise clips for further study or creative use in digital audio workstations (DAWs).
+
+## Key Features
+
+- **🔍 Research-First Acquisition** — Gather audio from digital repositories or local field recordings.
+- **🎙️ Time-Coded Transcription**:
+  - **OpenAI Whisper** — Local, high-accuracy speech-to-text with segment-level timestamps.
+  - **Annotation Engine** — Support for metadata-rich transcripts for deep analysis.
+- **✂️ Selective Archiving** — Extract precise clips by timestamp to curate specific sonic events.
+- **📁 Structured Data Organization** — Every project maintains a clear manifest, sidecar metadata, and a verified audit trail of all operations.
 
 ## Quick Start
 
 ### 1. Setup
 
 ```powershell
-git clone https://github.com/eric-rolph/media-harvest.git
-cd media-harvest
+git clone https://github.com/eric-rolph/aural-archive.git
+cd aural-archive
 .\setup.ps1
 .\venv\Scripts\Activate.ps1
 ```
 
-### 2. Create a Project
+### 2. Initialize a Study Project
 
 ```powershell
-python -m media_harvest init my-song
+python -m media_harvest init field-observation-01
 ```
 
-This creates `projects/my-song/` with template config files.
+This creates a structured directory at `projects/field-observation-01/` with study-specific configuration templates.
 
-### 3. Configure Search Presets
+### 3. Define Acquisition Presets
 
-Edit `projects/my-song/presets.json` to define your categories and YouTube search terms:
+Edit `projects/field-observation-01/presets.json` to define your observation categories and capture parameters:
 
 ```json
 {
   "categories": {
-    "01_vocals": {
-      "label": "Vocals & Speech",
-      "description": "Spoken word samples for the intro.",
-      "search_terms": [
-        "famous speech audio",
-        "spoken word poetry performance"
-      ],
-      "keywords": ["speech", "vocal"]
+    "01_field_recordings": {
+      "label": "Field Recordings",
+      "description": "Environmental audio captured during site visits.",
+      "search_terms": ["site A ambient", "industrial drone"],
+      "keywords": ["ambient", "drone", "site-a"]
     },
-    "02_ambient": {
-      "label": "Ambient Textures",
-      "description": "Background layers and atmospheric beds.",
-      "search_terms": [
-        "field recording rainforest",
-        "urban night ambient"
-      ],
-      "keywords": ["ambient", "texture"]
+    "02_archival_footage": {
+      "label": "Archival Sources",
+      "description": "Historical records and digital archives.",
+      "search_terms": ["1950s urban history", "oral history interview"],
+      "keywords": ["history", "archive", "speech"]
     }
   }
 }
 ```
 
-### 4. Download Audio
+### 4. Acquire Audio
 
 ```powershell
-# Interactive search — browse and pick
-python -m media_harvest download -p my-song --search
+# Interactive acquisition — browse and select for archival
+python -m media_harvest download -p field-observation-01 --search
 
-# Batch download top 3 results per search term
-python -m media_harvest download -p my-song --batch --max-results 3
-
-# Download a specific URL
-python -m media_harvest download -p my-song --url "https://youtube.com/watch?v=..." --category 01_vocals
-
-# Preview without downloading
-python -m media_harvest download -p my-song --search --dry-run
+# Direct archival from a specific URL or repository link
+python -m media_harvest download -p field-observation-01 --url "https://..." --category 02_archival_footage
 ```
 
-### 5. Transcribe
+### 5. Generate Transcripts
 
 ```powershell
-# Transcribe all downloads with Whisper
-python -m media_harvest transcribe -p my-song
-
-# Use a larger model for better accuracy
-python -m media_harvest transcribe -p my-song --model medium
+# Transcribe all archived files to create time-coded research logs
+python -m media_harvest transcribe -p field-observation-01 --model medium
 ```
 
-Each audio file gets a `.txt` transcript with timestamped segments — use these to find the exact clips you want.
+Each audio file generates a `.txt` transcription with sub-second timestamps, allowing you to pinpoint specific sonic events for your analysis.
 
-### 6. Define Extractions
+### 6. Mark Observations for Extraction
 
-After reviewing transcripts, edit `projects/my-song/extractions.json` to define which clips to cut:
+Review your transcripts and define precise clips in `projects/field-observation-01/extractions.json`:
 
 ```json
 {
-  "01_intro_hooks": [
+  "archival_highlights": [
     {
-      "source": "01_vocals/Famous_Speech.wav",
+      "source": "02_archival_footage/Historical_Interview.wav",
       "clips": [
         {
-          "start": 12.5,
-          "end": 18.0,
-          "name": "key_phrase_hook",
-          "note": "The iconic opening line — perfect for song intro"
+          "start": 45.2,
+          "end": 52.8,
+          "name": "significant_quote",
+          "note": "A primary observation regarding urban development."
         }
       ]
     }
@@ -116,81 +107,44 @@ After reviewing transcripts, edit `projects/my-song/extractions.json` to define 
 ### 7. Extract Samples
 
 ```powershell
-python -m media_harvest extract -p my-song
+python -m media_harvest extract -p field-observation-01
 ```
 
-Clips land in `projects/my-song/samples/`, organized by category and ready for your DAW.
+Clips are saved in `projects/field-observation-01/samples/`, organized by observation category.
 
 ## CLI Reference
 
 | Command | Description |
 |---|---|
-| `init <name>` | Create a new project with template configs |
-| `download -p <name>` | Download audio (`--search`, `--batch`, or `--url`) |
-| `transcribe -p <name>` | Transcribe all downloaded audio with Whisper |
-| `extract -p <name>` | Extract clips based on `extractions.json` |
-| `status -p <name>` | Show project status & stats |
-| `list` | List all projects |
-
-### Download Flags
-
-| Flag | Default | Description |
-|---|---|---|
-| `--search` | — | Interactive: browse results, pick which to download |
-| `--batch` | — | Auto-download top N results per search term |
-| `--url <URL>` | — | Download a single URL |
-| `--category <id>` | all | Target a specific category |
-| `--max-results <N>` | 5 | Max search results per query |
-| `--max-duration <s>` | 600 | Skip videos longer than N seconds |
-| `--sample-rate <Hz>` | 44100 | WAV sample rate |
-| `--bit-depth <16\|24\|32>` | 16 | WAV bit depth |
-| `--dry-run` | — | Preview without downloading |
+| `init <name>` | Initialize a new archival project |
+| `download -p <name>` | Acquire audio (`--search`, `--batch`, or `--url`) |
+| `transcribe -p <name>` | Generate time-coded transcripts for all project audio |
+| `extract -p <name>` | Cut precise clips based on `extractions.json` |
+| `status -p <name>` | View project statistics and archival progress |
+| `list` | List all active projects |
 
 ## Project Structure
 
 ```
-media-harvest/
-├── media_harvest/           # Core Python package
-│   ├── __main__.py          # CLI entry point
-│   ├── config.py            # Auto-detection & project paths
-│   ├── download.py          # YouTube search & download
-│   ├── transcribe.py        # Whisper + captions + Gemini
-│   ├── extract.py           # Sample extraction
-│   └── utils.py             # Shared utilities
-├── projects/                # Your creative projects
-│   ├── _example_song/       # Song production example
-│   └── _example_documentary/# Documentary example
+aural-archive/
+├── media_harvest/           # Analysis core
+├── projects/                # Archival projects
+│   ├── _example_field_study/          # Environmental study example
+│   └── _example_sonic_exploration/    # Creative archaeology example
 ├── requirements.txt
 ├── setup.ps1
-├── .env.example
-└── .gitignore
+└── .env.example
 ```
 
-Each project in `projects/` follows this structure:
+## Legal & Ethical Use
 
-```
-my-project/
-├── presets.json        # Search categories & YouTube queries
-├── extractions.json    # Clip extraction map (timestamps)
-├── output/             # Downloaded audio files + manifests
-│   ├── 01_category/
-│   ├── 02_category/
-│   ├── manifest.json
-│   └── transcripts.json
-└── samples/            # Extracted clips, ready for DAW
-    ├── 01_intro/
-    └── 02_textures/
-```
+Aural Archive is designed for researchers, archivists, and creators to manage and analyze recordings in accordance with applicable laws. 
 
-## Prerequisites
-
-- **Python 3.10+**
-- **FFmpeg** — auto-detected from PATH, or set `FFMPEG_PATH` in `.env`
-- **GPU recommended** for Whisper `medium`/`large` models (CPU works for `tiny`/`base`)
-
-## Origins
-
-This toolkit was born from the [auction-audio-pipeline](https://github.com/eric-rolph/media-harvest/tree/main/projects/_example_song) project — a system for downloading and sampling auction chant audio for electronic music production. The patterns proved useful enough to generalize into a reusable tool for any creative media harvesting workflow.
+**Important Notice:**
+- This tool is intended only for use with audio for which you have the legal right to access, download, or analyze (e.g., public domain content, content with appropriate Creative Commons licenses, or recordings you own).
+- Users are responsible for complying with the terms of service of any digital repositories or platforms accessed via this tool.
+- Unauthorized transcription or distribution of copyrighted material may be against the law in your jurisdiction.
+- The developers of Aural Archive do not condone or support the use of this tool for copyright infringement.
 
 ## License
 

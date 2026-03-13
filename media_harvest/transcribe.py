@@ -1,5 +1,5 @@
 """
-Media Harvest — Transcription Module
+Aural Archive — Transcription Module
 ======================================
 Transcribes downloaded audio files using multiple strategies:
   1. YouTube captions API (fastest, if available)
@@ -224,7 +224,7 @@ def batch_transcribe(project: str, model_size: str = "base",
     output_dir = config.get_project_output_dir(project)
 
     print("=" * 70)
-    print(f"  MEDIA HARVEST — TRANSCRIPTION")
+    print(f"  Aural Archive — TRANSCRIPTION")
     print(f"  Project: {project}")
     print(f"  Model: whisper-{model_size}  |  Files: {len(audio_files)}")
     print("=" * 70)

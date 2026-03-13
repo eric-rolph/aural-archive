@@ -1,5 +1,5 @@
 """
-Configuration management for Media Harvest.
+Configuration management for Aural Archive.
 
 Handles auto-detection of ffmpeg/ffprobe/yt-dlp, .env loading,
 and project directory structure.

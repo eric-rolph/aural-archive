@@ -1,19 +1,23 @@
 """
-Media Harvest — Download Module
-================================
-Downloads audio from YouTube (or any yt-dlp-supported site) and converts
-to production-ready WAV files. Supports search, batch, and direct URL modes.
+Aural Archive — Acquisition Module
+==================================
+Acquires audio from digital repositories or local sources and converts
+to production-ready WAV files. Supports archival search, batch, and direct
+URL modes.
 
-Generalized from the auction-audio-pipeline project.
+Delegates actual acquisition to the pluggable extractor system and
+tracks job state via the SQLite journal for crash recovery.
 """
 
 import json
 import subprocess
 import sys
-from datetime import datetime, timezone
 from pathlib import Path
 
 from . import config
+from .extractors import get_extractor
+from .headers import get_random_headers
+from .state import StateManager
 from .utils import sanitize_filename, format_duration
 
 
@@ -63,18 +67,21 @@ def ensure_output_dirs(project: str, presets: dict):
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# YouTube search via yt-dlp
+# Archival search via yt-dlp
 # ─────────────────────────────────────────────────────────────────────────────
 
 def yt_search(query: str, max_results: int = 5, max_duration: int = 600) -> list:
-    """Search YouTube via yt-dlp and return a list of result dicts."""
+    """Search digital repositories via yt-dlp and return a list of result dicts."""
     yt_dlp = config.get_yt_dlp()
+    headers = get_random_headers()
+
     cmd = [
         yt_dlp,
         f"ytsearch{max_results}:{query}",
         "--dump-json",
         "--flat-playlist",
         "--no-download",
+        "--user-agent", headers["User-Agent"],
     ]
     result = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8")
     entries = []
@@ -112,33 +119,8 @@ def display_results(results: list, query: str):
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Download & Convert
+# Download via extractor system
 # ─────────────────────────────────────────────────────────────────────────────
-
-def _find_latest_file(directory: Path) -> Path | None:
-    """Find the most recently modified file in directory (non-recursive)."""
-    files = [f for f in directory.iterdir() if f.is_file() and f.suffix.lower() != ".json"]
-    if not files:
-        return None
-    return max(files, key=lambda f: f.stat().st_mtime)
-
-
-def _get_duration(path: Path) -> float:
-    """Use ffprobe to get duration in seconds."""
-    ffprobe = config.get_ffprobe()
-    cmd = [
-        ffprobe,
-        "-v", "error",
-        "-show_entries", "format=duration",
-        "-of", "csv=p=0",
-        str(path),
-    ]
-    result = subprocess.run(cmd, capture_output=True, text=True)
-    try:
-        return float(result.stdout.strip())
-    except ValueError:
-        return 0.0
-
 
 def download_and_convert(
     url: str,
@@ -149,106 +131,19 @@ def download_and_convert(
     output_format: str = "wav",
 ) -> dict | None:
     """
-    Download audio from *url* via yt-dlp, convert to the target format via ffmpeg.
+    Acquire audio from *url* via the best-matching extractor.
     Returns a manifest entry dict on success, or None on failure.
     """
-    yt_dlp = config.get_yt_dlp()
-    ffmpeg = config.get_ffmpeg()
-
-    # Step 1: Download best audio with yt-dlp
-    tmp_template = str(output_dir / "%(title)s.%(ext)s")
-    cmd_dl = [
-        yt_dlp,
-        "--no-playlist",
-        "-x",                          # extract audio
-        "--audio-format", "wav",       # let yt-dlp try wav first
-        "--ffmpeg-location", str(Path(ffmpeg).parent),
-        "-o", tmp_template,
-        "--no-overwrites",
-        url,
-    ]
-
-    print(f"  ⬇  Downloading: {url}")
-    dl_result = subprocess.run(cmd_dl, capture_output=True, text=True, encoding="utf-8")
-
-    if dl_result.returncode != 0:
-        # Fallback: download as best audio, then convert manually
-        print("  ⚠  Direct WAV failed, trying fallback download...")
-        cmd_dl_fb = [
-            yt_dlp,
-            "--no-playlist",
-            "-x",
-            "--audio-format", "best",
-            "--ffmpeg-location", str(Path(ffmpeg).parent),
-            "-o", tmp_template,
-            "--no-overwrites",
-            url,
-        ]
-        dl_result = subprocess.run(cmd_dl_fb, capture_output=True, text=True, encoding="utf-8")
-        if dl_result.returncode != 0:
-            print(f"  ✗  Download FAILED for: {url}")
-            print(f"     stderr: {dl_result.stderr[:300]}")
-            return None
-
-    # Find the downloaded file (most recent in output_dir)
-    downloaded_file = _find_latest_file(output_dir)
-    if not downloaded_file:
-        print(f"  ✗  Could not find downloaded file in {output_dir}")
-        return None
-
-    print(f"  ✓  Downloaded: {downloaded_file.name}")
-
-    # Step 2: Convert to target format with precise specs via ffmpeg
-    out_name = sanitize_filename(downloaded_file.stem) + f".{output_format}"
-    out_path = output_dir / out_name
-
-    # Determine codec string for bit depth
-    codec_map = {16: "pcm_s16le", 24: "pcm_s24le", 32: "pcm_s32le"}
-    codec = codec_map.get(bit_depth, "pcm_s16le")
-
-    if downloaded_file == out_path:
-        tmp_path = output_dir / (sanitize_filename(downloaded_file.stem) + "_tmp.wav")
-        downloaded_file.rename(tmp_path)
-        downloaded_file = tmp_path
-
-    cmd_ff = [
-        ffmpeg,
-        "-y",
-        "-i", str(downloaded_file),
-        "-ar", str(sample_rate),
-        "-ac", "2",                   # stereo
-        "-acodec", codec,
-        "-f", output_format,
-        str(out_path),
-    ]
-
-    print(f"  ⚙  Converting to {output_format.upper()} ({sample_rate} Hz, {bit_depth}-bit)...")
-    ff_result = subprocess.run(cmd_ff, capture_output=True, text=True, encoding="utf-8")
-
-    if ff_result.returncode != 0:
-        print(f"  ✗  FFmpeg conversion FAILED")
-        print(f"     stderr: {ff_result.stderr[:300]}")
-        return None
-
-    # Clean up intermediate file
-    if downloaded_file.exists() and downloaded_file != out_path:
-        downloaded_file.unlink()
-
-    # Get duration of output file
-    duration = _get_duration(out_path)
-
-    print(f"  ✓  Output: {out_path.name}  ({duration:.1f}s)")
-
-    return {
-        "file": str(out_path.name),
-        "source_url": url,
-        "title": title_hint or out_path.stem,
-        "duration_seconds": round(duration, 2),
-        "sample_rate": sample_rate,
-        "bit_depth": bit_depth,
-        "format": output_format,
-        "downloaded_at": datetime.now(timezone.utc).isoformat(),
-    }
+    extractor = get_extractor(url)
+    print(f"  🔌  Using extractor: {extractor.name}")
+    return extractor.download(
+        url=url,
+        output_dir=output_dir,
+        sample_rate=sample_rate,
+        bit_depth=bit_depth,
+        output_format=output_format,
+        title_hint=title_hint,
+    )
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -290,7 +185,7 @@ def mode_search(project: str, presets: dict, category: str | None,
                 seen.add(r["id"])
                 unique.append(r)
 
-        print(f"\n  Found {len(unique)} unique videos. Enter numbers to download (comma-separated),")
+        print(f"\n  Found {len(unique)} unique recordings. Enter numbers to acquire (comma-separated),")
         print(f"  'a' for all, or 'n' to skip:")
         for i, r in enumerate(unique, 1):
             dur = format_duration(r["duration"]) if r["duration"] else "??:??"
@@ -308,47 +203,17 @@ def mode_search(project: str, presets: dict, category: str | None,
 
         manifest = load_manifest(project)
         out_dir = config.get_project_output_dir(project) / cat_id
-        for r in to_download:
-            entry = download_and_convert(
-                r["url"], out_dir,
-                sample_rate=sample_rate,
-                bit_depth=bit_depth,
-                title_hint=r["title"],
-            )
-            if entry:
-                entry["category"] = cat_id
-                manifest.append(entry)
-                save_manifest(project, manifest)
 
+        with StateManager(project) as state:
+            for r in to_download:
+                # Register in state journal
+                state.add_job(r["url"], category=cat_id, title=r["title"])
 
-def mode_batch(project: str, presets: dict, category: str | None,
-               max_results: int, max_duration: int, sample_rate: int,
-               bit_depth: int, dry_run: bool):
-    """Batch mode: auto-download top N results for each search term."""
-    cats = [category] if category else get_category_ids(presets)
-    manifest = load_manifest(project)
-
-    for cat_id in cats:
-        cat = presets["categories"][cat_id]
-        out_dir = config.get_project_output_dir(project) / cat_id
-        print(f"\n{'═' * 70}")
-        print(f"  BATCH: {cat['label']}")
-        print(f"{'═' * 70}")
-
-        for term in cat["search_terms"]:
-            results = yt_search(term, max_results=max_results, max_duration=max_duration)
-            display_results(results, term)
-
-            if dry_run:
-                print("  [DRY RUN] Skipping downloads.\n")
-                continue
-
-            for r in results:
-                # Skip if already in manifest
-                if any(m.get("source_url") == r["url"] for m in manifest):
-                    print(f"  ⏭  Already downloaded: {r['title']}")
+                if state.is_completed(r["url"]):
+                    print(f"  ⏭  Already completed: {r['title']}")
                     continue
 
+                state.start_job(r["url"], extractor=get_extractor(r["url"]).name)
                 entry = download_and_convert(
                     r["url"], out_dir,
                     sample_rate=sample_rate,
@@ -359,6 +224,83 @@ def mode_batch(project: str, presets: dict, category: str | None,
                     entry["category"] = cat_id
                     manifest.append(entry)
                     save_manifest(project, manifest)
+                    state.complete_job(r["url"], result_file=entry.get("file", ""))
+                else:
+                    state.fail_job(r["url"], error="Download or conversion failed")
+
+
+def mode_batch(project: str, presets: dict, category: str | None,
+               max_results: int, max_duration: int, sample_rate: int,
+               bit_depth: int, dry_run: bool, retry_failed: bool = False):
+    """Batch mode: auto-acquire top N results for each search term."""
+    cats = [category] if category else get_category_ids(presets)
+    manifest = load_manifest(project)
+
+    with StateManager(project) as state:
+        # Crash recovery: reset any stuck in_progress jobs
+        state.reset_in_progress()
+
+        # Retry failed jobs if requested
+        if retry_failed:
+            failed = state.get_failed()
+            if failed:
+                print(f"\n  🔄  Retrying {len(failed)} previously failed jobs...")
+                state.reset_failed()
+
+        for cat_id in cats:
+            cat = presets["categories"][cat_id]
+            out_dir = config.get_project_output_dir(project) / cat_id
+            print(f"\n{'═' * 70}")
+            print(f"  BATCH: {cat['label']}")
+            print(f"{'═' * 70}")
+
+            for term in cat["search_terms"]:
+                results = yt_search(term, max_results=max_results, max_duration=max_duration)
+                display_results(results, term)
+
+                if dry_run:
+                    print("  [DRY RUN] Skipping downloads.\n")
+                    continue
+
+                for r in results:
+                    url = r["url"]
+
+                    # Register in state journal
+                    state.add_job(url, category=cat_id, title=r["title"])
+
+                    # Skip if already completed
+                    if state.is_completed(url):
+                        print(f"  ⏭  Already completed: {r['title']}")
+                        continue
+
+                    # Also check manifest for backward compat
+                    if any(m.get("source_url") == url for m in manifest):
+                        print(f"  ⏭  Already in manifest: {r['title']}")
+                        state.complete_job(url, result_file="manifest-legacy")
+                        continue
+
+                    extractor = get_extractor(url)
+                    state.start_job(url, extractor=extractor.name)
+
+                    entry = download_and_convert(
+                        url, out_dir,
+                        sample_rate=sample_rate,
+                        bit_depth=bit_depth,
+                        title_hint=r["title"],
+                    )
+                    if entry:
+                        entry["category"] = cat_id
+                        manifest.append(entry)
+                        save_manifest(project, manifest)
+                        state.complete_job(url, result_file=entry.get("file", ""))
+                    else:
+                        state.fail_job(url, error="Download or conversion failed")
+
+        # Print journal summary
+        counts = state.get_counts()
+        print(f"\n  📊  Journal: {counts.get('completed', 0)} completed, "
+              f"{counts.get('failed', 0)} failed, "
+              f"{counts.get('pending', 0)} pending")
 
     print(f"\n  Done. {len(manifest)} total files in manifest.")
 
@@ -383,13 +325,27 @@ def mode_url(project: str, presets: dict, url: str, category: str,
         print(f"  [DRY RUN] Would download: {url} → {category}")
         return
 
-    entry = download_and_convert(
-        url, out_dir,
-        sample_rate=sample_rate,
-        bit_depth=bit_depth,
-    )
-    if entry:
-        entry["category"] = category
-        manifest.append(entry)
-        save_manifest(project, manifest)
-        print(f"\n  ✓  Saved and logged.")
+    with StateManager(project) as state:
+        state.add_job(url, category=category)
+
+        if state.is_completed(url):
+            print(f"  ⏭  Already completed: {url}")
+            return
+
+        extractor = get_extractor(url)
+        state.start_job(url, extractor=extractor.name)
+
+        entry = download_and_convert(
+            url, out_dir,
+            sample_rate=sample_rate,
+            bit_depth=bit_depth,
+        )
+        if entry:
+            entry["category"] = category
+            manifest.append(entry)
+            save_manifest(project, manifest)
+            state.complete_job(url, result_file=entry.get("file", ""))
+            print(f"\n  ✓  Saved and logged.")
+        else:
+            state.fail_job(url, error="Acquisition or conversion failed")
+            print(f"\n  ✗  Acquisition failed. Run with --retry-failed to retry later.")

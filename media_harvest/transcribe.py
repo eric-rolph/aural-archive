@@ -1,12 +1,10 @@
 """
 Aural Archive — Transcription Module
 ======================================
-Transcribes downloaded audio files using multiple strategies:
-  1. YouTube captions API (fastest, if available)
+Generates time-coded transcripts for captured audio files using:
+  1. Automated captions (repository-provided, if available)
   2. OpenAI Whisper (local, robust fallback)
-  3. Google Gemini visual transcription (for video with scene descriptions)
-
-Generalized from transcribe-suite and auction-audio-pipeline.
+  3. Google Gemini visual transcription (for video scene context)
 """
 
 import json
@@ -97,9 +95,18 @@ def transcribe_from_captions(url: str) -> str | None:
         return None
 
 
-def transcribe_with_whisper(audio_path: str, model_size: str = "base") -> dict:
-    """Transcribe an audio file using local Whisper model."""
+def transcribe_with_whisper(audio_path: str, model_size: str = "base", diarize: bool = False) -> dict:
+    """
+    Transcribe an audio file using local Whisper model.
+    Optional diarization support (experimental).
+    """
     whisper = _get_whisper()
+
+    if diarize:
+        print("  ⚠️  Diarization is currently an experimental feature and requires pyannote.audio")
+        # Placeholder for future integration:
+        # 1. Fetch RTTM from pyannote
+        # 2. Align with Whisper segments
 
     # Ensure ffmpeg is on PATH for Whisper
     ffmpeg_dir = str(Path(config.get_ffmpeg()).parent)
@@ -189,7 +196,7 @@ def save_transcripts(project: str, data: dict):
 
 
 def collect_audio_files(project: str, category: str | None = None) -> list[Path]:
-    """Collect all audio files in the project's output directory."""
+    """Collect all audio files in the project archival directory."""
     output_dir = config.get_project_output_dir(project)
     audio_extensions = {".wav", ".mp3", ".flac", ".m4a", ".opus", ".ogg"}
 
@@ -218,7 +225,7 @@ def batch_transcribe(project: str, model_size: str = "base",
     """Transcribe all audio files in a project using Whisper."""
     audio_files = collect_audio_files(project, category)
     if not audio_files:
-        print("No audio files found. Run 'download' first.")
+        print("No audio files found. Run 'download' (capture) first.")
         return
 
     output_dir = config.get_project_output_dir(project)

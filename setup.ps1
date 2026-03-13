@@ -20,7 +20,8 @@ Write-Host "Setup Complete!" -ForegroundColor Green
 Write-Host "  1. .\venv\Scripts\Activate.ps1"
 Write-Host "  2. python -m media_harvest --help"
 Write-Host ""
-Write-Host "Quick start:" -ForegroundColor Cyan
+Write-Host "Quick start (Research Workflow):" -ForegroundColor Cyan
 Write-Host "  python -m media_harvest init field-study-01"
-Write-Host "  python -m media_harvest download --project field-study-01 --url 'https://...'"
+Write-Host "  python -m media_harvest capture --project field-study-01 --search"
 Write-Host "  python -m media_harvest transcribe --project field-study-01"
+Write-Host "  python -m media_harvest stats --project field-study-01"

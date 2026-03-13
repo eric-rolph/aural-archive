@@ -1,8 +1,9 @@
 """
-Aural Archive — A general-purpose media extraction & transcription toolkit.
+Aural Archive - A general-purpose audio transcription and sonic archival toolkit.
 
-Download audio/video from YouTube, transcribe with Whisper or captions API,
-extract timestamped samples, and organize everything into named projects.
+Acquire audio from digital repositories or local sources, generate 
+time-coded transcripts, extract precise samples, and organize everything 
+into structured research projects.
 """
 
 __version__ = "1.0.0"
